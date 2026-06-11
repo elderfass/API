@@ -11,6 +11,10 @@ import org.springframework.web.bind.annotation.*;
 import com.example.Api_mongo.models.LibroM;
 import com.example.Api_mongo.services.LibroS;
 
+import org.springframework.web.bind.annotation.CrossOrigin;
+
+@CrossOrigin(origins = "*")
+
 @RestController
 @RequestMapping("/libros")
 public class LibroC {

@@ -10,6 +10,10 @@ import org.springframework.web.bind.annotation.*;
 import com.example.Api_mongo.models.PrestamoM;
 import com.example.Api_mongo.services.PrestamoS;
 
+import org.springframework.web.bind.annotation.CrossOrigin;
+
+@CrossOrigin(origins = "*")
+
 @RestController
 @RequestMapping("/prestamos")
 public class PrestamoC {

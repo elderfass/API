@@ -11,6 +11,10 @@ import org.springframework.web.bind.annotation.*;
 import com.example.Api_mongo.models.ClienteM;
 import com.example.Api_mongo.services.ClienteS;
 
+import org.springframework.web.bind.annotation.CrossOrigin;
+
+@CrossOrigin(origins = "*")
+
 @RestController
 @RequestMapping("/clientes")
 public class ClienteC {
