@@ -11,10 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import com.example.Api_mongo.models.ClienteM;
 import com.example.Api_mongo.services.ClienteS;
 
-import org.springframework.web.bind.annotation.CrossOrigin;
-
 @CrossOrigin(origins = "*")
-
 @RestController
 @RequestMapping("/clientes")
 public class ClienteC {
@@ -22,13 +19,30 @@ public class ClienteC {
     @Autowired
     private ClienteS clienteS;
 
-    // GET /clientes - Obtener todos los clientes
+    // GET /clientes                 → todos
+    // GET /clientes?nombre=ana      → búsqueda parcial por nombre
     @GetMapping
-    public ResponseEntity<List<ClienteM>> getClientes() {
+    public ResponseEntity<List<ClienteM>> getClientes(
+            @RequestParam(required = false) String nombre) {
+
+        if (nombre != null && !nombre.isBlank()) {
+            return ResponseEntity.ok(clienteS.obtenerClientesPorNombre(nombre));
+        }
         return ResponseEntity.ok(clienteS.obtenerClientes());
     }
 
-    // GET /clientes/{id} - Obtener cliente por ID
+    // GET /clientes/buscar?nombre=Carlos Pez  → ruta dedicada, sin ambigüedad con /{id}
+    @GetMapping("/buscar")
+    public ResponseEntity<?> buscarPorNombre(@RequestParam String nombre) {
+        List<ClienteM> resultado = clienteS.obtenerClientesPorNombre(nombre);
+        if (resultado.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("No se encontraron clientes con nombre: " + nombre);
+        }
+        return ResponseEntity.ok(resultado);
+    }
+
+    // GET /clientes/{id}  → solo por ID de MongoDB
     @GetMapping("/{id}")
     public ResponseEntity<?> getClienteById(@PathVariable String id) {
         return clienteS.obtenerClientePorId(id)
@@ -37,19 +51,21 @@ public class ClienteC {
                 .body("Cliente no encontrado con id: " + id));
     }
 
-    // POST /clientes - Registrar nuevo cliente
+    // POST /clientes
     @PostMapping
     public ResponseEntity<?> postCliente(@RequestBody ClienteM cliente) {
         try {
-            return ResponseEntity.status(HttpStatus.CREATED).body(clienteS.guardarCliente(cliente));
+            return ResponseEntity.status(HttpStatus.CREATED)
+                    .body(clienteS.guardarCliente(cliente));
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
         }
     }
 
-    // PUT /clientes/{id} - Actualizar cliente
+    // PUT /clientes/{id}
     @PutMapping("/{id}")
-    public ResponseEntity<?> putCliente(@PathVariable String id, @RequestBody ClienteM cliente) {
+    public ResponseEntity<?> putCliente(
+            @PathVariable String id, @RequestBody ClienteM cliente) {
         try {
             return ResponseEntity.ok(clienteS.actualizarCliente(id, cliente));
         } catch (RuntimeException e) {
@@ -57,16 +73,17 @@ public class ClienteC {
         }
     }
 
-    // PATCH /clientes/{id} - Actualizar cliente parcialmente
+    // PATCH /clientes/{id}
     @PatchMapping("/{id}")
-    public ResponseEntity<?> patchCliente(@PathVariable String id, @RequestBody Map<String, Object> campos) {
+    public ResponseEntity<?> patchCliente(
+            @PathVariable String id, @RequestBody Map<String, Object> campos) {
         return clienteS.actualizarParcial(id, campos)
             .<ResponseEntity<?>>map(ResponseEntity::ok)
             .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body("Cliente no encontrado con id: " + id));
     }
 
-    // DELETE /clientes/{id} - Eliminar cliente
+    // DELETE /clientes/{id}
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteCliente(@PathVariable String id) {
         try {
