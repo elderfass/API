@@ -24,6 +24,16 @@ public class ClienteS {
         return clienteR.findById(id);
     }
 
+    // Búsqueda parcial por nombre → GET /clientes?nombre=ana
+    public List<ClienteM> obtenerClientesPorNombre(String nombre) {
+        return clienteR.findByNombreContainingIgnoreCase(nombre);
+    }
+
+    // Búsqueda exacta por nombre → GET /clientes/Ana García
+    public Optional<ClienteM> obtenerClientePorNombreExacto(String nombre) {
+        return clienteR.findByNombreIgnoreCase(nombre);
+    }
+
     public ClienteM guardarCliente(ClienteM cliente) {
         if (clienteR.existsByEmail(cliente.getEmail())) {
             throw new RuntimeException("Ya existe un cliente con el email: " + cliente.getEmail());
@@ -45,20 +55,11 @@ public class ClienteS {
         return clienteR.findById(id).map(cliente -> {
             campos.forEach((llave, valor) -> {
                 switch (llave) {
-                    case "nombre":
-                        cliente.setNombre((String) valor);
-                        break;
-                    case "email":
-                        cliente.setEmail((String) valor);
-                        break;
-                    case "telefono":
-                        cliente.setTelefono((String) valor);
-                        break;
-                    case "direccion":
-                        cliente.setDireccion((String) valor);
-                        break;
-                    default:
-                        break;
+                    case "nombre":   cliente.setNombre((String) valor);    break;
+                    case "email":    cliente.setEmail((String) valor);     break;
+                    case "telefono": cliente.setTelefono((String) valor);  break;
+                    case "direccion":cliente.setDireccion((String) valor); break;
+                    default: break;
                 }
             });
             return clienteR.save(cliente);
